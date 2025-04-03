@@ -1,9 +1,15 @@
 from datetime import datetime,timezone,timedelta
 import pytz as pytz
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render,redirect
 from django.views import View
+from rest_framework.views import APIView
+
+from edue import settings
 from .models import User,OtpCode
 from accounts.forms import UserRegistraionForm,VerifyCodeForm,LoginForm,PasswordResetForm,PasswordResetConfirmForm
 from utils import generate_otp,send_otp
@@ -97,6 +103,15 @@ class VerifyCodeView(View):
                 return redirect('accounts:verify_code')
 
         return render(request, "accounts/verify.html", {"form": form})
+
+
+
+class GoogleLogin(SocialLoginView):
+    adapter_class = GoogleOAuth2Adapter
+    callback_url = settings.GOOGLE_OAUTH_CALLBACK_URL
+    client_class = OAuth2Client
+
+
 
 
 

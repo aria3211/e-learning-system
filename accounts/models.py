@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from accounts.manager import UserManager
@@ -51,7 +53,8 @@ class OtpCode(models.Model):
     def __str__(self):
         return f"{self.phone_number}-{self.otp}"
 
-
+    def has_expired(self):
+        return now() > self.otp_expiry
 
 
 class Profile(models.Model):
