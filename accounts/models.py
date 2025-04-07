@@ -1,4 +1,5 @@
-from datetime import timezone
+from datetime import timedelta
+from django.utils import timezone
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -42,12 +43,13 @@ class User(AbstractUser):
         return self.is_admin
 
 
-
+def default_otp_expiry():
+    return timezone.now() + timedelta(minutes=1)
 class OtpCode(models.Model):
     phone_number = models.CharField(max_length=11, unique=True)
     otp = models.CharField(max_length=6)
-    otp_expiry = models.DateTimeField(auto_now=True)
-    max_otp_try = models.CharField(max_length=2, default=settings.MAX_OTP_TRY)
+    otp_expiry = models.DateTimeField(blank=True, null=True)
+    max_otp_try = models.IntegerField(max_length=2, default=settings.MAX_OTP_TRY)
     otp_max_out = models.DateTimeField(blank=True, null=True)
     
     def __str__(self):
@@ -55,6 +57,7 @@ class OtpCode(models.Model):
 
     def has_expired(self):
         return now() > self.otp_expiry
+
 
 
 class Profile(models.Model):

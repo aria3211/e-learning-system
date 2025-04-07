@@ -84,7 +84,7 @@ class RegisterUserSerializer(serializers.Serializer):
     def create(self, validated_data):
         phone_number = validated_data['phone_number']
 
-        OtpCode.objects.filter(phone_number=phone_number, expires_at__lt=timezone.now()).delete()
+        OtpCode.objects.filter(phone_number=phone_number, otp_expiry__lt=timezone.now()).delete()
 
         existing_otp = OtpCode.objects.filter(phone_number=phone_number).first()
         if existing_otp and not existing_otp.is_expired():
@@ -95,7 +95,7 @@ class RegisterUserSerializer(serializers.Serializer):
             phone_number=phone_number,
             otp=code,
             max_otp_try=3,
-            expires_at=timezone.now() + timedelta(minutes=5)
+            otp_expiry=timezone.now() + timedelta(minutes=5)
         )
 
         send_otp(phone_number, code)
@@ -122,7 +122,7 @@ class VerifyOtpSerializer(serializers.Serializer):
         except OtpCode.DoesNotExist:
             raise serializers.ValidationError("کد اشتباه است یا وجود ندارد.")
 
-        if otp_instance.is_expired():
+        if otp_instance.has_expired():
             otp_instance.delete()
             raise serializers.ValidationError("کد منقضی شده است. لطفاً دوباره درخواست دهید.")
 
